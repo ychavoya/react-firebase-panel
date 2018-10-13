@@ -8,12 +8,74 @@ import Spinner from "../layout/Spinner";
 import classnames from "classnames";
 
 class ClientDetails extends Component {
+  state = {
+    showBalanceForm: false,
+    balanceUpdate: ""
+  };
+
   static propTypes = {
     firestore: PropTypes.object.isRequired
   };
 
+  onChange = e => {
+    this.setState({ [e.target.name]: e.target.value });
+  };
+
+  balanceSubmit = e => {
+    e.preventDefault();
+
+    const { client, firestore } = this.props;
+    const { balanceUpdate } = this.state;
+
+    const update = {
+      balance: parseFloat(balanceUpdate)
+    };
+
+    // Enviar a firestore
+    firestore.update({ collection: "clients", doc: client.id }, update);
+  };
+
+  onDelete = async () => {
+    const { firestore, client, history } = this.props;
+
+    await firestore.delete({ collection: "clients", doc: client.id });
+
+    history.push("/");
+  };
+
   render() {
     const { client } = this.props;
+
+    const { showBalanceForm, balanceUpdate } = this.state;
+
+    let balanceForm = "";
+
+    // Si debería mostrar
+    if (showBalanceForm) {
+      balanceForm = (
+        <form onSubmit={this.balanceSubmit}>
+          <div className="input-group">
+            <input
+              type="number"
+              className="form-control"
+              name="balanceUpdate"
+              placeholder="Nuevo balance"
+              value={balanceUpdate}
+              onChange={this.onChange}
+            />
+            <div className="input-group-append">
+              <input
+                type="submit"
+                value="Actualizar"
+                className="btn btn-outline-dark"
+              />
+            </div>
+          </div>
+        </form>
+      );
+    } else {
+      balanceForm = null;
+    }
 
     if (client) {
       return (
@@ -29,7 +91,9 @@ class ClientDetails extends Component {
                 <Link className="btn btn-dark" to={`/client/edit/${client.id}`}>
                   Editar
                 </Link>
-                <button className="btn btn-danger">Eliminar</button>
+                <button onClick={this.onDelete} className="btn btn-danger">
+                  Eliminar
+                </button>
               </div>
             </div>
           </div>
@@ -55,11 +119,22 @@ class ClientDetails extends Component {
                         "text-success": client.balance <= 0
                       })}
                     >
-                      ${parseFloat(client.balance).toFixed(2)}
+                      ${parseFloat(client.balance).toFixed(2) + " "}
                     </span>
+                    <small>
+                      <a
+                        href="javascript:void(0)"
+                        onClick={() =>
+                          this.setState({
+                            showBalanceForm: !this.state.showBalanceForm
+                          })
+                        }
+                      >
+                        <i className="fas fa-pencil-alt" />
+                      </a>
+                    </small>
                   </h3>
-
-                  {/* balance editable */}
+                  {balanceForm}
                 </div>
               </div>
               <hr />
