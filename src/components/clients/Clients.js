@@ -25,7 +25,7 @@ export default class Clients extends Component {
     if (clients) {
       return (
         <div>
-          <div class="row">
+          <div className="row">
             <div className="col-md-6">
               <h2>
                 <i className="fas fa-users" /> Clientes
