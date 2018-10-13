@@ -1,26 +1,39 @@
 import React, { Component } from "react";
 import { Link } from "react-router-dom";
+import { compose } from "redux";
+import { connect } from "react-redux";
+import { firestoreConnect } from "react-redux-firebase";
+import PropTypes from "prop-types";
+import Spinner from "../layout/Spinner";
 
-export default class Clients extends Component {
+class Clients extends Component {
+  state = {
+    totalDeuda: null
+  };
+
+  static propTypes = {
+    firestore: PropTypes.object.isRequired,
+    clients: PropTypes.array
+  };
+
+  static getDerivedStateFromProps(props, state) {
+    const { clients } = props;
+
+    if (clients) {
+      // Agregar deudas
+      const total = clients.reduce((total, client) => {
+        return total + parseFloat(client.balance.toString());
+      }, 0);
+
+      return { totalDeuda: total };
+    }
+
+    return null;
+  }
+
   render() {
-    const clients = [
-      {
-        id: "123123",
-        firstName: "Kevin",
-        lastName: "Martinez",
-        email: "kev@gmail.com",
-        phone: "123123",
-        balance: "200"
-      },
-      {
-        id: "123133",
-        firstName: "Pedro",
-        lastName: "López",
-        email: "pedro@gmail.com",
-        phone: "99999",
-        balance: "2000"
-      }
-    ];
+    const { clients } = this.props;
+    const { totalDeuda } = this.state;
 
     if (clients) {
       return (
@@ -31,7 +44,14 @@ export default class Clients extends Component {
                 <i className="fas fa-users" /> Clientes
               </h2>
             </div>
-            <div className="col-md-6" />
+            <div className="col-md-6">
+              <h5 className="text-right text-secondary">
+                Deuda Total{" "}
+                <span className="text-danger">
+                  ${parseFloat(totalDeuda).toFixed(2)}
+                </span>
+              </h5>
+            </div>
           </div>
 
           <table className="table table-striped">
@@ -66,6 +86,13 @@ export default class Clients extends Component {
           </table>
         </div>
       );
-    } else return <h1>Cargando...</h1>;
+    } else return <Spinner />;
   }
 }
+
+export default compose(
+  firestoreConnect([{ collection: "clients" }]),
+  connect((state, props) => ({
+    clients: state.firestore.ordered.clients
+  }))
+)(Clients);
