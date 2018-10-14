@@ -14,9 +14,18 @@ class Login extends Component {
 
   static propTypes = {
     firebase: PropTypes.object.isRequired,
+    settings: PropTypes.object.isRequired,
     notify: PropTypes.object.isRequired,
     notifyUser: PropTypes.func.isRequired
   };
+
+  componentWillMount() {
+    const { allowRegistration } = this.props.settings;
+
+    if (!allowRegistration) {
+      this.props.history.push("/");
+    }
+  }
 
   onSubmit = e => {
     e.preventDefault();
@@ -24,13 +33,11 @@ class Login extends Component {
     const { firebase, notifyUser, notify } = this.props;
     const { email, password } = this.state;
 
+    // registrar
     firebase
-      .login({
-        email,
-        password
-      })
+      .createUser({ email, password })
       .then(() => (notify.message = null))
-      .catch(err => notifyUser("Inicio de sesión inválido", "error"));
+      .catch(err => notifyUser("Usuario ya existente", "error"));
   };
 
   onChange = e => {
@@ -47,7 +54,7 @@ class Login extends Component {
             <div className="card-body">
               <h1 className="text-center pb-4 pt-3">
                 <span className="text-primary">
-                  <i className="fas fa-lock" /> Iniciar sesión
+                  <i className="fas fa-lock" /> Registro
                 </span>
               </h1>
 
@@ -81,7 +88,7 @@ class Login extends Component {
 
                 <input
                   type="submit"
-                  value="Iniciar sesión"
+                  value="Registrarse"
                   className="btn btn-primary btn-block"
                 />
               </form>
@@ -97,7 +104,8 @@ export default compose(
   firebaseConnect(),
   connect(
     (state, props) => ({
-      notify: state.notify
+      notify: state.notify,
+      settings: state.settings
     }),
     { notifyUser }
   )

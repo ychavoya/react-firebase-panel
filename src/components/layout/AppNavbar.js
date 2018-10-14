@@ -37,6 +37,7 @@ class AppNavbar extends Component {
   render() {
     const { isAuthenticated } = this.state;
     const { auth } = this.props;
+    const { allowRegistration } = this.props.settings;
 
     return (
       <nav className="navbar navbar-expand-md navbar-dark bg-success mb-4">
@@ -85,6 +86,20 @@ class AppNavbar extends Component {
                   >
                     Cerrar sesión
                   </a>
+                </li>
+              </ul>
+            ) : null}
+            {allowRegistration && !isAuthenticated ? (
+              <ul className="navbar-nav ml-auto">
+                <li className="nav-item">
+                  <Link to="/login" className="nav-link">
+                    Iniciar Sesión
+                  </Link>
+                </li>
+                <li className="nav-item">
+                  <Link to="/register" className="nav-link">
+                    Registro
+                  </Link>
                 </li>
               </ul>
             ) : null}
