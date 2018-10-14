@@ -4,6 +4,7 @@ import "firebase/firestore";
 import { reactReduxFirebase, firebaseReducer } from "react-redux-firebase";
 import { reduxFirestore, firestoreReducer } from "redux-firestore";
 import notifyReducer from "./reducers/notifyReducer";
+import settingsReducer from "./reducers/settingsReducer";
 
 // Información de firebase (API, url...)
 import firebaseConfig from "./env";
@@ -32,11 +33,25 @@ const createStoreWithFirebase = compose(
 const rootReducer = combineReducers({
   firebase: firebaseReducer,
   firestore: firestoreReducer,
-  notify: notifyReducer
+  notify: notifyReducer,
+  settings: settingsReducer
 });
 
+// Verificar si hay configuración el local storage
+if (localStorage.getItem("settings") === null) {
+  const defaultSettings = {
+    disableBalanceOnAdd: true,
+    disableBalanceOnEdit: false,
+    allowRegistration: false
+  };
+
+  localStorage.setItem("settings", JSON.stringify(defaultSettings));
+}
+
 // Estado inicial
-const initialState = {};
+const initialState = {
+  settings: JSON.parse(localStorage.getItem("settings"))
+};
 
 // Crear store
 const store = createStoreWithFirebase(
