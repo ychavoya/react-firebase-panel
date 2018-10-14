@@ -3,6 +3,7 @@ import firebase from "firebase";
 import "firebase/firestore";
 import { reactReduxFirebase, firebaseReducer } from "react-redux-firebase";
 import { reduxFirestore, firestoreReducer } from "redux-firestore";
+import notifyReducer from "./reducers/notifyReducer";
 
 // Información de firebase (API, url...)
 import firebaseConfig from "./env";
@@ -30,7 +31,8 @@ const createStoreWithFirebase = compose(
 
 const rootReducer = combineReducers({
   firebase: firebaseReducer,
-  firestore: firestoreReducer
+  firestore: firestoreReducer,
+  notify: notifyReducer
 });
 
 // Estado inicial

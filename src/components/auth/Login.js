@@ -1,8 +1,10 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
-//import { compose } from "redux";
-//import { connect } from "react-redux";
+import { compose } from "redux";
+import { connect } from "react-redux";
 import { firebaseConnect } from "react-redux-firebase";
+import { notifyUser } from "../../actions/notifyActions";
+import Alert from "../layout/Alert";
 
 class Login extends Component {
   state = {
@@ -17,7 +19,7 @@ class Login extends Component {
   onSubmit = e => {
     e.preventDefault();
 
-    const { firebase } = this.props;
+    const { firebase, notifyUser, notify } = this.props;
     const { email, password } = this.state;
 
     firebase
@@ -25,7 +27,8 @@ class Login extends Component {
         email,
         password
       })
-      .catch(err => alert("Login inválido"));
+      .then(() => (notify.message = null))
+      .catch(err => notifyUser("Inicio de sesión inválido", "error"));
   };
 
   onChange = e => {
@@ -33,6 +36,8 @@ class Login extends Component {
   };
 
   render() {
+    const { message, messageType } = this.props.notify;
+
     return (
       <div className="row">
         <div className="col-md-6 mx-auto">
@@ -43,6 +48,11 @@ class Login extends Component {
                   <i className="fas fa-lock" /> Iniciar sesión
                 </span>
               </h1>
+
+              {message ? (
+                <Alert message={message} messageType={messageType} />
+              ) : null}
+
               <form onSubmit={this.onSubmit}>
                 <div className="form-group">
                   <label htmlFor="email">Email</label>
@@ -70,7 +80,7 @@ class Login extends Component {
                 <input
                   type="submit"
                   value="Iniciar sesión"
-                  class="btn btn-primary btn-block"
+                  className="btn btn-primary btn-block"
                 />
               </form>
             </div>
@@ -81,4 +91,12 @@ class Login extends Component {
   }
 }
 
-export default firebaseConnect()(Login);
+export default compose(
+  firebaseConnect(),
+  connect(
+    (state, props) => ({
+      notify: state.notify
+    }),
+    { notifyUser }
+  )
+)(Login);
